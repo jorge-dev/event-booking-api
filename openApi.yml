@@ -42,6 +42,15 @@ paths:
       operationId: createEvent
       tags:
         - events
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/EventInfo'
       responses:
         '201':
           description: Event created successfully
@@ -90,7 +99,7 @@ paths:
               type: object
               properties:
                 data:
-                  $ref: '#/components/schemas/EventInput'
+                  $ref: '#/components/schemas/EventInfo'
       responses:
         '200':
           description: Event updated successfully
@@ -131,7 +140,7 @@ paths:
               type: object
               properties:
                 data:
-                  $ref: '#/components/schemas/UserInput'
+                  $ref: '#/components/schemas/UserInfo'
       responses:
         '201':
           description: User created successfully
@@ -225,6 +234,15 @@ components:
 
   schemas:
     Event:
+      example:
+        id: "1"
+        type: "event"
+        attributes:
+          title: "Event 1"
+          description: "This is the first event"
+          location: "Location 1"
+          dateTime: "2021-01-01T12:00:00Z"
+          user_id: "1"
       type: object
       properties:
         id:
@@ -235,46 +253,92 @@ components:
         attributes:
           type: object
           properties:
-            name:
+            title:
               type: string
             description:
               type: string
-            date:
+            location:
+              type: string
+            dateTime:
               type: string
               format: date-time
+            user_id:
+              type: string
 
-    EventInput:
+    EventInfo:
+      example:
+        type: "event"
+        attributes:
+          title: "Event 1"
+          description: "This is the first event"
+          location: "Location 1"
+          dateTime: "2021-01-01T12:00:00Z"
       type: object
+      required:
+        - type
+        - attributes
       properties:
         type:
           type: string
           example: "event"
         attributes:
           type: object
+          required:
+            - title
+            - description
+            - location
+            - dateTime
           properties:
-            name:
+            tile:
               type: string
+              description: The name of the event
             description:
               type: string
-            date:
+              description: A brief description of the event
+            location:
+              type: string
+              description: The location of the event
+            dateTime:
               type: string
               format: date-time
-
-    UserInput:
+      
+    UserInfo:
+      example:
+        type: "user"
+        attributes:
+          name: "John Doe"
+          email: "john@example.com"
+          username: "johndoe"
+          password: "password"
       type: object
       properties:
         type:
           type: string
           example: "user"
         attributes:
+          required:
+            - name
+            - email
+            - username
+            - password
           type: object
           properties:
+            name:
+              type: string
+            email:
+              type: string
             username:
               type: string
             password:
               type: string
 
     User:
+      example:
+        id: "1"
+        type: "user"
+        attributes:
+          username: "johndoe"
+          email: "john@example.com"
       type: object
       properties:
         id:
@@ -287,14 +351,26 @@ components:
           properties:
             username:
               type: string
+            email:
+              type: string
+            name:
+              type: string
 
     LoginInput:
+      example:
+        type: "login"
+        attributes:
+          username: "johndoe"
+          password: "password"
       type: object
       properties:
         type:
           type: string
           example: "login"
         attributes:
+          required:
+            - username
+            - password
           type: object
           properties:
             username:
