@@ -1,0 +1,303 @@
+openapi: 3.0.0
+info:
+  title: Event Booking API
+  version: 1.0.0
+  description: A Go-powered API for booking events
+  contact:
+    name: API Support
+    url: http://www.example.com/support
+    email: support@example.com
+
+tags:
+  - name: events
+    description: Operations related to events
+  - name: users
+    description: Operations related to users
+
+servers:
+  - url: http://localhost:8080/v1/api
+    description: Local development server
+security:
+  - bearerAuth: []
+
+
+paths:
+  /events:
+    get:
+      description: Get list of available events
+      operationId: getEvents
+      tags:
+        - events
+      responses:
+        '200':
+          description: A list of available events
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Event'
+    post:
+      description: Create a new bookable event
+      operationId: createEvent
+      tags:
+        - events
+      responses:
+        '201':
+          description: Event created successfully
+        '401':
+          description: Authentication required
+  /events/{id}:
+    get:
+      description: Get a specific event by ID
+      tags:
+        - events
+      operationId: getEvent
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Event details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Event'
+
+    put:
+      description: Update an event
+      tags:
+        - events
+      operationId: updateEvent
+      
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/EventInput'
+      responses:
+        '200':
+          description: Event updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Event'
+
+    delete:
+      description: Delete an event
+      tags:
+        - events
+      operationId: deleteEvent
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Event deleted successfully
+
+  /signup:
+    post:
+      description: Create a new user
+      tags:
+        - users
+      operationId: createUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/UserInput'
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/User'
+
+  /login:
+    post:
+      description: Authenticate user
+      tags:
+        - users
+      operationId: loginUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  $ref: '#/components/schemas/LoginInput'
+      responses:
+        '200':
+          description: JWT Token issued
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      token:
+                        type: string
+
+  /events/{id}/register:
+    post:
+      description: Register user for an event
+      tags:
+        - events
+      operationId: registerUser
+      
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: User registered for the event
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      event_id:
+                        type: string
+                      user_id:
+                        type: string
+
+    delete:
+      description: Cancel registration for an event
+      tags:
+        - events
+      operationId: cancelRegistration
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Registration cancelled
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Event:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+          example: "event"
+        attributes:
+          type: object
+          properties:
+            name:
+              type: string
+            description:
+              type: string
+            date:
+              type: string
+              format: date-time
+
+    EventInput:
+      type: object
+      properties:
+        type:
+          type: string
+          example: "event"
+        attributes:
+          type: object
+          properties:
+            name:
+              type: string
+            description:
+              type: string
+            date:
+              type: string
+              format: date-time
+
+    UserInput:
+      type: object
+      properties:
+        type:
+          type: string
+          example: "user"
+        attributes:
+          type: object
+          properties:
+            username:
+              type: string
+            password:
+              type: string
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+          example: "user"
+        attributes:
+          type: object
+          properties:
+            username:
+              type: string
+
+    LoginInput:
+      type: object
+      properties:
+        type:
+          type: string
+          example: "login"
+        attributes:
+          type: object
+          properties:
+            username:
+              type: string
+            password:
+              type: string
