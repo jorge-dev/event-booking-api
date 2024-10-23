@@ -11,6 +11,12 @@ func RegisterRoutes(server *gin.Engine) {
 		v1.GET("/events", GetEvents)
 		v1.GET("/events/:id", GetEvent)
 		v1.POST("/events", middleware.ExtractEventAttributes(), CreateEvent)
+		v1.PUT("/events/:id", middleware.ExtractEventAttributes(), UpdateEvent)
+		v1.DELETE("/events/:id", DeleteEvent)
+
+		// User routes
+		v1.POST("/signup", middleware.ExtractUserAttributes(), SignUp)
+		v1.POST("/login", middleware.ExtractAuthUserAttributes(), Login)
 
 	}
 }
