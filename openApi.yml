@@ -205,9 +205,9 @@ paths:
                   data:
                     type: object
                     properties:
-                      event_id:
+                      eventId:
                         type: string
-                      user_id:
+                      userId:
                         type: string
 
     delete:

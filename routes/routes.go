@@ -21,6 +21,11 @@ func RegisterRoutes(server *gin.Engine) {
 		v1Auth.POST("/events", middleware.ExtractEventAttributes(), CreateEvent)
 		v1Auth.PUT("/events/:id", middleware.ExtractEventAttributes(), UpdateEvent)
 		v1Auth.DELETE("/events/:id", DeleteEvent)
+
+		// registration routes
+		v1Auth.POST("/events/:id/register", RegisterForEvents)
+		v1Auth.DELETE("/events/:id/register", CancelRegistration)
+
 	}
 
 }

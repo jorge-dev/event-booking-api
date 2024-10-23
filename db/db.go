@@ -60,6 +60,23 @@ func createTables() {
 		errorString := "Error creating the events table: " + err.Error()
 		panic(errors.New(errorString))
 	}
+
+	createRegistrationsTableStmt := `
+	CREATE TABLE IF NOT EXISTS registrations (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		eventId INTEGER,
+		userId INTEGER,
+		createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+		FOREIGN KEY(eventId) REFERENCES events(id) ON DELETE CASCADE,
+		FOREIGN KEY(userId) REFERENCES users(id) ON DELETE CASCADE
+	);
+	`
+
+	_, err = DB.Exec(createRegistrationsTableStmt)
+	if err != nil {
+		errorString := "Error creating the registrations table: " + err.Error()
+		panic(errors.New(errorString))
+	}
 }
 
 func CloseDB() {

@@ -110,3 +110,37 @@ func (event *Event) Delete() error {
 	}
 	return nil
 }
+
+func (e *Event) Register(userId int64) error {
+	query := `INSERT INTO registrations (eventId, userId) VALUES (?, ?)`
+	stmt, err := db.DB.Prepare(query)
+	if err != nil {
+		errorMessage := fmt.Sprintf("Error preparing query to register for event: %d : error %s", e.ID, err.Error())
+		return errors.New(errorMessage)
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(e.ID, userId)
+	if err != nil {
+		errorMessage := fmt.Sprintf("Error registering for event: %d : error %s", e.ID, err.Error())
+		return errors.New(errorMessage)
+	}
+	return nil
+}
+
+func (e *Event) CancelRegistration(userId int64) error {
+	query := `DELETE FROM registrations WHERE eventId = ? AND userId = ?`
+	stmt, err := db.DB.Prepare(query)
+	if err != nil {
+		errorMessage := fmt.Sprintf("Error preparing query to cancel registration for event: %d : error %s", e.ID, err.Error())
+		return errors.New(errorMessage)
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(e.ID, userId)
+	if err != nil {
+		errorMessage := fmt.Sprintf("Error canceling registration for event: %d : error %s", e.ID, err.Error())
+		return errors.New(errorMessage)
+	}
+	return nil
+}
