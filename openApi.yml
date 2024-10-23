@@ -369,11 +369,12 @@ components:
           example: "login"
         attributes:
           required:
-            - username
             - password
           type: object
           properties:
             username:
+              type: string
+            email:
               type: string
             password:
               type: string
