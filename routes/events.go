@@ -52,6 +52,15 @@ func GetEvent(c *gin.Context) {
 // @response 201 - Event created successfully with the event details.
 // @response 500 - Internal server error with an error message.
 func CreateEvent(c *gin.Context) {
+	var err error
+
+	userId := c.GetInt64("userId")
+
+	if userId == 0 {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "User ID not found in context"})
+		return
+	}
+
 	event, exists := c.Get("event")
 	if !exists {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Event not found in context"})
@@ -60,8 +69,8 @@ func CreateEvent(c *gin.Context) {
 
 	eventModel := event.(models.Event)
 	eventModel.ID = 1
-	eventModel.UserId = 1
-	err := eventModel.Save()
+	eventModel.UserId = userId
+	err = eventModel.Save()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
@@ -99,6 +108,9 @@ func UpdateEvent(c *gin.Context) {
 		return
 	}
 
+	updatedEvent.ID = eventId
+	updatedEvent.UserId = 2233
+
 	err = updatedEvent.Update()
 	if err != nil {
 		errorMessage := "Error updating event with ID: " + strconv.FormatInt(eventId, 10)
@@ -129,7 +141,7 @@ func DeleteEvent(c *gin.Context) {
 	eventToDelete, err := models.GetByID(eventId)
 	if err != nil {
 		errorMessage := "Could not find event with ID: " + strconv.FormatInt(eventId, 10)
-		c.JSON(http.StatusInternalServerError, gin.H{"message": errorMessage})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": errorMessage, "error": err.Error()})
 		return
 	}
 

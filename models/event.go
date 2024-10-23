@@ -14,7 +14,7 @@ type Event struct {
 	Description string    `json:"description" binding:"required"`
 	Location    string    `json:"location" binding:"required"`
 	DateTime    time.Time `json:"dateTime" binding:"required"`
-	UserId      int       `json:"userId"`
+	UserId      int64     `json:"userId"`
 	CreatedAt   time.Time `json:"createdAt"`
 }
 
@@ -49,7 +49,7 @@ func GetAll() ([]Event, error) {
 	events := []Event{}
 	for rows.Next() {
 		event := Event{}
-		err := rows.Scan(&event.ID, &event.Title, &event.Description, &event.Location, &event.DateTime, &event.UserId)
+		err := rows.Scan(&event.ID, &event.Title, &event.Description, &event.Location, &event.DateTime, &event.UserId, &event.CreatedAt)
 		if err != nil {
 			errorMessage := "Error scanning events from db: " + err.Error()
 			return nil, errors.New(errorMessage)
@@ -69,7 +69,7 @@ func GetByID(id int64) (*Event, error) {
 	defer stmt.Close()
 
 	event := Event{}
-	err = stmt.QueryRow(id).Scan(&event.ID, &event.Title, &event.Description, &event.Location, &event.DateTime, &event.UserId)
+	err = stmt.QueryRow(id).Scan(&event.ID, &event.Title, &event.Description, &event.Location, &event.DateTime, &event.UserId, &event.CreatedAt)
 	if err != nil {
 		errorMessage := fmt.Sprintf("Error getting event by id: %d : error %s", id, err.Error())
 		return nil, errors.New(errorMessage)
@@ -78,7 +78,7 @@ func GetByID(id int64) (*Event, error) {
 }
 
 func (event *Event) Update() error {
-	query := `UPDATE events SET name = ?, description = ?, location = ?, dateTime = ? WHERE id = ?`
+	query := `UPDATE events SET name = ?, description = ?, location = ?, dateTime = ?, userId = ? WHERE id = ?`
 	stmt, err := db.DB.Prepare(query)
 	if err != nil {
 		errorMessage := fmt.Sprintf("Error preparing query to update event: %d : error %s", event.ID, err.Error())
@@ -86,7 +86,7 @@ func (event *Event) Update() error {
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(event.Title, event.Description, event.Location, event.DateTime, event.ID)
+	_, err = stmt.Exec(&event.Title, &event.Description, &event.Location, &event.DateTime, &event.UserId, &event.ID)
 	if err != nil {
 		errorMessage := fmt.Sprintf("Error updating event: %d : error %s", event.ID, err.Error())
 		return errors.New(errorMessage)
