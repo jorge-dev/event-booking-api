@@ -69,3 +69,77 @@ func CreateEvent(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{"message": "Event created successfully", "event": eventModel})
 
 }
+
+// Function to update an event
+// UpdateEvent handles the update of an existing event.
+// It retrieves the event from the context, updates it in the database, and returns a JSON response.
+// If the event is not found in the context or if there is an error during updating, it returns an error response.
+//
+// @param c *gin.Context - The Gin context which contains the request and response objects.
+//
+// @response 200 - Event updated successfully with the event details.
+// @response 500 - Internal server error with an error message.
+func UpdateEvent(c *gin.Context) {
+	event, exists := c.Get("event")
+	if !exists {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Event not found in context"})
+		return
+	}
+
+	updatedEvent := event.(models.Event)
+	eventId, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid event ID"})
+		return
+	}
+	_, err = models.GetByID(eventId)
+	if err != nil {
+		errorMessage := "Could not find event with ID: " + strconv.FormatInt(eventId, 10)
+		c.JSON(http.StatusInternalServerError, gin.H{"message": errorMessage})
+		return
+	}
+
+	err = updatedEvent.Update()
+	if err != nil {
+		errorMessage := "Error updating event with ID: " + strconv.FormatInt(eventId, 10)
+		c.JSON(http.StatusInternalServerError, gin.H{"message": errorMessage})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Event updated successfully", "event": updatedEvent})
+
+}
+
+// Function to delete an event
+// DeleteEvent handles the deletion of an existing event.
+// It retrieves the event from the context, deletes it from the database, and returns a JSON response.
+// If the event is not found in the context or if there is an error during deletion, it returns an error response.
+//
+// @param c *gin.Context - The Gin context which contains the request and response objects.
+//
+// @response 200 - Event deleted successfully with the event details.
+// @response 500 - Internal server error with an error message.
+func DeleteEvent(c *gin.Context) {
+
+	eventId, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid event ID"})
+		return
+	}
+	eventToDelete, err := models.GetByID(eventId)
+	if err != nil {
+		errorMessage := "Could not find event with ID: " + strconv.FormatInt(eventId, 10)
+		c.JSON(http.StatusInternalServerError, gin.H{"message": errorMessage})
+		return
+	}
+
+	err = eventToDelete.Delete()
+	if err != nil {
+		errorMessage := "Error deleting event with ID: " + strconv.FormatInt(eventId, 10)
+		c.JSON(http.StatusInternalServerError, gin.H{"message": errorMessage})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Event deleted successfully", "event": eventToDelete})
+
+}
