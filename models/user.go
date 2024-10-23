@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/jorge-dev/ev-book/db"
+	"github.com/jorge-dev/ev-book/utils"
 	hash "github.com/jorge-dev/ev-book/utils"
 )
 
@@ -45,28 +46,36 @@ func (u *User) Save() error {
 	return err
 }
 
-func (u *AuthUser) ValidateCredentials() error {
-	query := `SELECT password FROM users WHERE username = ? OR email = ?`
+func (u *AuthUser) ValidateCredentials() (string, error) {
+	query := `SELECT password, id FROM users WHERE username = ? OR email = ?`
 	stmt, err := db.DB.Prepare(query)
 	if err != nil {
 		errorMessage := "Error preparing the query to get the user: " + err.Error()
-		return errors.New(errorMessage)
+		return "", errors.New(errorMessage)
 	}
 	defer stmt.Close()
 	row := stmt.QueryRow(u.Username, u.Email)
 
 	var retrievePwd string
-	err = row.Scan(&retrievePwd)
+	var authUserId int64
+	err = row.Scan(&retrievePwd, &authUserId)
 	if err != nil {
 		errorMessage := "invalid credentials. Please check your username or email"
-		return errors.New(errorMessage)
+		return "", errors.New(errorMessage)
 	}
 
 	if !hash.ComparePasswords(retrievePwd, u.Password) {
 		errorMessage := "invalid credentials. Please check your username or email"
-		return errors.New(errorMessage)
+		return "", errors.New(errorMessage)
 	}
 
-	return nil
+	token, err := utils.GenerateToken(u.Email, authUserId)
+
+	if err != nil {
+		errorMessage := "Error generating token: " + err.Error()
+		return "", errors.New(errorMessage)
+	}
+
+	return token, nil
 
 }

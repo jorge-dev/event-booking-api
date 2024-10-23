@@ -32,11 +32,11 @@ func Login(context *gin.Context) {
 		return
 	}
 	userModel := userEvent.(models.AuthUser)
-	err := userModel.ValidateCredentials()
+	token, err := userModel.ValidateCredentials()
 	if err != nil {
 		context.JSON(http.StatusUnauthorized, gin.H{"message": err.Error()})
 		return
 	}
 
-	context.JSON(http.StatusOK, gin.H{"message": "Login successful"})
+	context.JSON(http.StatusOK, gin.H{"message": "Login successful", "token": token})
 }

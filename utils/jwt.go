@@ -1,15 +1,25 @@
 package utils
 
 import (
+	"errors"
+	"fmt"
+	"time"
+
 	"github.com/golang-jwt/jwt/v5"
 )
 
 // GenerateToken generates a new JWT token
-func GenerateToken() (string, error) {
-	token := jwt.New(jwt.SigningMethodHS256)
+func GenerateToken(email string, userId int64) (string, error) {
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"authorized": true,
+		"email":      email,
+		"userId":     userId,
+		"exp":        time.Now().Add(time.Hour * 2).Unix(),
+	})
 	tokenString, err := token.SignedString([]byte("secret"))
 	if err != nil {
-		return "", err
+		errorMessage := fmt.Sprintf("Error generating token: %v", err)
+		return "", errors.New(errorMessage)
 	}
 	return tokenString, nil
 }
